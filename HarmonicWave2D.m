@@ -1,14 +1,9 @@
-nx = 50; ny = 50;
-C.hb = 1.054571596e-34;             % Dirac constant
-C.m_0 = 9.10938215e-31;             % electron mass
+nx = 50; ny = 51;
 G = sparse(nx*ny, nx*ny);
-phi = zeros(nx*ny,1);
-E = zeros(nx*ny,1);
-B = (C.hb^2) / (2 * C.m_0);
-dx2 = dx^2;
-% GE = alpha*E
+V = zeros(nx,ny);
+
 for m = 1:nx
-    G(m,:) = B / ; 
+    G(m,:) = 0; 
     G(m,m) = 1;
 end
 
@@ -16,19 +11,51 @@ for i = 1:nx
     for j = 1:ny
         n = j + (i-1)*ny;
         if i == 1
-            G(n, n) = B / dx2;
+            G(n, n) = 1;
         elseif i == nx
-            G(n, n) = B / dx2;
+            G(n, n) = 1;
         elseif j == 1
-            G(n, n) = B / dy2;
+            G(n, n) = 1;
         elseif j == ny
-            G(n, n) = B / dy2;            
+            G(n, n) = 1;            
         else
-            G(n, n) = E() -2*E() + E() + E() -2*E() + E();
-            G(n-1, n) = -B / dx2;
-            G(n+1, n) = -B / dx2;
+            G(n, n) = -4;
+            n1 = j + (i-2)*ny;
+            G(n1, n) = 1;
+            n2 = j + i*ny;           
+            G(n2, n) = 1;
+            n3 = j + 1 + (i-1)*ny;            
+            G(n3, n) = 1;
+            n4 = j - 1 + (i-1)*ny;            
+            G(n4, n) = 1;        
         end
     end
 end
+figure(1)
 spy(G)
 [E,D] = eigs(G,9,'SM');
+figure(2)
+plot(diag(D),'*');
+% mode = 1;
+% figure(3)
+% Emode = E(:,1);
+% for i = 1:nx
+%     for j = 1:ny
+%         n = j + (i-1)*ny;
+%         V(i,j) = Emode(n);
+%     end
+%     surf(V)
+% end
+np = ceil(sqrt(9));
+figure('name','Modes')
+for k = 1:9
+    M = E(:,k);
+    for i = 1:nx
+        for j = 1:ny
+            n = j + (i-1)*ny;
+            V(i,j) = M(n);
+        end
+        subplot(np,np,k), surf(V,'linestyle','none')
+        title(['EV = ' num2str(D(k,k))])
+    end
+end
